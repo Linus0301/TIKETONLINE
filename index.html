@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TiketNow — Sistem Pemesanan (V4 Final Fixed)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+    <style>
+      :root {
+        --grad-from: #a66cff;
+        --grad-to: #3e8ede;
+        --accent: #7b2cbf;
+        --white-sky: #f8f9ff;
+        --muted: #6b7280;
+        --card-radius: 14px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+        margin: 0;
+        min-height: 100vh;
+        background: linear-gradient(180deg, var(--grad-from), var(--grad-to));
+        color: #07203a;
+        padding-bottom: 40px;
+      }
+      .app-wrap {
+        padding: 28px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .logo {
+        background: var(--white-sky);
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-weight: 700;
+        color: var(--grad-from);
+      }
+      .glass {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+        border-radius: var(--card-radius);
+        box-shadow: 0 10px 30px rgba(21, 32, 64, 0.12);
+        padding: 18px;
+      }
+      .btn-primary-accent {
+        background: linear-gradient(90deg, var(--accent), #5b3bd6);
+        border: 0;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(123, 44, 191, 0.18);
+        transition: transform 0.14s ease, box-shadow 0.14s ease;
+      }
+      .btn-primary-accent:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(123, 44, 191, 0.22);
+      }
+      .btn-outline-soft {
+        border-radius: 10px;
+        border: 1px solid rgba(7, 32, 58, 0.06);
+        background: transparent;
+        color: #07203a;
+        padding: 8px 12px;
+      }
+      .form-control,
+      .form-select {
+        border-radius: 10px;
+        border: 1px solid rgba(7, 32, 58, 0.06);
+        padding: 10px;
+      }
+      .small-muted {
+        color: var(--muted);
+        font-size: 0.875rem;
+      }
+      .order-item {
+        transition: box-shadow 0.14s ease;
+        border-radius: 12px;
+        background: linear-gradient(180deg, #fff, #fbfdff);
+        padding: 14px;
+        border: 1px solid rgba(7, 32, 58, 0.04);
+      }
+      .ktp-thumb {
+        width: 60px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid rgba(7, 32, 58, 0.1);
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+      .ktp-thumb:hover {
+        transform: scale(1.1);
+      }
+      .admin-box {
+        background: var(--white-sky);
+        border-radius: 12px;
+        padding: 14px;
+        box-shadow: 0 10px 30px rgba(2, 6, 23, 0.06);
+      }
+      .modal-content {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      }
+      .hero-card {
+        border-radius: 16px;
+        padding: 18px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), #fff);
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        box-shadow: 0 12px 30px rgba(2, 6, 23, 0.06);
+        height: 100%;
+      }
+      .icon-circle {
+        width: 72px;
+        height: 72px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .icon-plane {
+        background: linear-gradient(90deg, var(--grad-from), #8a6bff);
+      }
+      .icon-ship {
+        background: linear-gradient(90deg, #6ec0ff, #3e8ede);
+      }
+      .status-select {
+        border: 1px solid #eee;
+        padding: 4px 8px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        background-color: #fff;
+        cursor: pointer;
+      }
+      @media (max-width: 767px) {
+        .app-wrap {
+          padding: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-wrap">
+      <header class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center gap-3">
+          <div class="logo">TiketNow</div>
+          <div>
+            <div style="font-weight: 600; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1)">Sistem Pemesanan Tiket</div>
+            <small style="color: rgba(255, 255, 255, 0.8)">Pesawat & Kapal — Mudah & Cepat</small>
+          </div>
+        </div>
+        <div>
+          <button id="btn-help" class="btn btn-sm" style="background: rgba(255, 255, 255, 0.2); color: #fff; border: none"><i class="bi bi-question-circle"></i> Bantuan</button>
+        </div>
+      </header>
+
+      <!-- LOGIN SCREEN -->
+      <div id="login-screen" class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+          <div class="glass p-4 p-md-5">
+            <div class="mb-4">
+              <h3 style="font-weight: 700; color: var(--accent)">Selamat Datang</h3>
+              <p class="text-muted">Silakan masuk untuk mulai memesan tiket.</p>
+            </div>
+            <form id="loginForm">
+              <div class="mb-3">
+                <label class="form-label small-muted">Nama Lengkap</label>
+                <input id="login-username" class="form-control" placeholder="Contoh: Budi Santoso" required />
+              </div>
+              <div class="mb-4">
+                <label class="form-label small-muted">Tahun Lahir (4 digit)</label>
+                <input id="login-password" type="number" class="form-control" placeholder="Contoh: 1998" required />
+              </div>
+              <div class="d-grid gap-2">
+                <button class="btn btn-primary-accent py-2" type="submit"><i class="bi bi-box-arrow-in-right me-2"></i>Masuk Aplikasi</button>
+                <button id="demo-fill" type="button" class="btn btn-sm btn-outline-soft mt-2">Isi Data Demo</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD AREA -->
+      <div id="dashboard" style="display: none">
+        <div class="row gy-4">
+          <!-- Main Content (Left) -->
+          <div class="col-lg-8">
+            <!-- Welcome & Actions -->
+            <div class="glass mb-4">
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                  <h4 style="margin: 0; font-weight: 700">Halo, <span id="user-name-display" style="color: var(--accent)"></span>!</h4>
+                  <div class="small-muted">Mau pergi ke mana hari ini?</div>
+                </div>
+                <div class="d-flex gap-2">
+                  <button id="btn-admin-entry" class="btn btn-outline-soft btn-sm"><i class="bi bi-shield-lock"></i> Admin</button>
+                  <button id="btn-logout" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right"></i> Logout</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ordering Cards -->
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <div class="hero-card">
+                  <div class="icon-circle icon-plane"><i class="bi bi-airplane-engines"></i></div>
+                  <div>
+                    <h5 style="font-weight: 700; margin-bottom: 5px">Tiket Pesawat</h5>
+                    <p class="small-muted mb-3" style="line-height: 1.4">Terbang ke berbagai destinasi domestik dan internasional.</p>
+                    <button id="hero-flight" type="button" class="btn btn-sm btn-primary-accent">Pesan Pesawat</button>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="hero-card">
+                  <div class="icon-circle icon-ship"><i class="bi bi-ship"></i></div>
+                  <div>
+                    <h5 style="font-weight: 700; margin-bottom: 5px">Tiket Kapal</h5>
+                    <p class="small-muted mb-3" style="line-height: 1.4">Perjalanan laut nyaman antar pulau di Indonesia.</p>
+                    <button id="hero-ship" type="button" class="btn btn-sm btn-primary-accent">Pesan Kapal</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- User Orders List -->
+            <div class="glass">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 style="margin: 0; font-weight: 600"><i class="bi bi-ticket-perforated me-2" style="color: var(--accent)"></i>Riwayat Pesanan Anda</h5>
+                <button onclick="renderOrders()" class="btn btn-sm btn-light" title="Refresh"><i class="bi bi-arrow-clockwise"></i></button>
+              </div>
+              <div id="orders-list" style="max-height: 400px; overflow-y: auto; padding-right: 5px"></div>
+            </div>
+          </div>
+
+          <!-- Sidebar (Right) -->
+          <div class="col-lg-4">
+            <!-- User Profile Mini -->
+            <div class="glass mb-3 d-flex align-items-center gap-3">
+              <div style="width: 48px; height: 48px; background: var(--grad-from); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem">
+                <i class="bi bi-person"></i>
+              </div>
+              <div style="overflow: hidden">
+                <div id="mini-name" style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis"></div>
+                <div class="small-muted">Pengguna Aktif</div>
+              </div>
+            </div>
+
+            <!-- Admin Panel (Hidden by default) -->
+            <div id="admin-panel" style="display: none" class="admin-box sticky-top" style="top: 20px; z-index: 1020">
+              <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                <h6 style="margin: 0; color: var(--accent); font-weight: 700"><i class="bi bi-database-gear me-2"></i>Panel Admin</h6>
+                <button id="admin-logout" class="btn btn-sm btn-danger py-0" style="font-size: 0.75rem">Tutup</button>
+              </div>
+
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <button id="tab-orders" class="btn btn-outline-soft btn-sm w-100 text-start active-admin-tab"><i class="bi bi-list-check me-1"></i> Pesanan</button>
+                </div>
+                <div class="col-6">
+                  <button id="tab-users" class="btn btn-outline-soft btn-sm w-100 text-start"><i class="bi bi-people me-1"></i> Pengguna</button>
+                </div>
+                <div class="col-12">
+                  <button id="tab-loc" class="btn btn-outline-soft btn-sm w-100 text-start"><i class="bi bi-geo-alt me-1"></i> Kelola Lokasi (Pesawat & Kapal)</button>
+                </div>
+                <div class="col-12">
+                  <button id="tab-report" class="btn btn-outline-soft btn-sm w-100 text-start"><i class="bi bi-bar-chart me-1"></i> Laporan Ringkas</button>
+                </div>
+              </div>
+              <div id="admin-content" class="mt-2" style="max-height: 500px; overflow-y: auto"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- End Dashboard -->
+    </div>
+
+    <!-- MODALS -->
+    <!-- Admin Login -->
+    <div class="modal fade" id="adminLoginModal" tabindex="-1">
+      <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold">Login Admin</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="adminLoginForm">
+              <div class="mb-2"><input id="admin-username" class="form-control" placeholder="Username" required /></div>
+              <div class="mb-3"><input id="admin-password" type="password" class="form-control" placeholder="Password" required /></div>
+              <button class="btn btn-primary-accent w-100" type="submit">Masuk</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generic Confirm Modal (New Fixed for Logout/Delete) -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" data-bs-backdrop="static">
+      <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-body text-center p-4">
+            <div class="mb-3">
+              <i class="bi bi-exclamation-circle text-warning" style="font-size: 2.5rem"></i>
+            </div>
+            <h6 id="confirm-msg" class="fw-bold mb-3">Yakin ingin melanjutkan?</h6>
+            <div class="d-flex gap-2 justify-content-center">
+              <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">Batal</button>
+              <button type="button" id="confirm-yes-btn" class="btn btn-danger btn-sm px-3">Ya, Lanjutkan</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Form -->
+    <div class="modal fade" id="orderModal" tabindex="-1" data-bs-backdrop="static">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header border-0 pb-0">
+            <div>
+              <h5 class="modal-title fw-bold" id="orderModalTitle">Form Pemesanan</h5>
+              <p class="small-muted mb-0">Isi detail perjalanan Anda dengan lengkap.</p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="orderForm">
+              <input type="hidden" id="order-type" />
+              <div class="card p-3 mb-3 border-0 bg-light">
+                <h6 class="fw-bold mb-3" style="color: var(--accent)">1. Rute & Tanggal</h6>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label small-muted fw-bold" id="label-origin">Dari</label>
+                    <select id="origin-select" class="form-select fw-bold" required onchange="checkManual('origin')"></select>
+                    <input id="origin-manual" class="form-control mt-2 d-none border-primary" placeholder="Ketik lokasi asal..." />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small-muted fw-bold" id="label-dest">Ke</label>
+                    <select id="dest-select" class="form-select fw-bold" required onchange="checkManual('dest')"></select>
+                    <input id="dest-manual" class="form-control mt-2 d-none border-primary" placeholder="Ketik lokasi tujuan..." />
+                  </div>
+                  <div class="col-md-6"><label class="form-label small-muted">Tanggal Berangkat</label><input id="date-depart" type="date" class="form-control" required /></div>
+                  <div class="col-md-6">
+                    <label class="form-label small-muted">Tanggal Pulang</label>
+                    <div class="input-group">
+                      <div class="input-group-text"><input class="form-check-input mt-0" type="checkbox" id="toggle-return" /></div>
+                      <input id="date-return" type="date" class="form-control" disabled placeholder="Centang jika PP" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card p-3 mb-3 border-0 bg-light">
+                <h6 class="fw-bold mb-3" style="color: var(--accent)">2. Data Penumpang</h6>
+                <div class="p-3 bg-white rounded border mb-3">
+                  <div class="row g-2">
+                    <div class="col-6 col-md-2">
+                      <label class="small-muted">Title</label
+                      ><select id="p-title" class="form-select form-select-sm">
+                        <option>Tuan</option>
+                        <option>Nyonya</option>
+                        <option>Nona</option>
+                      </select>
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <label class="small-muted">Tipe</label
+                      ><select id="p-type" class="form-select form-select-sm">
+                        <option value="Dewasa">Dewasa</option>
+                        <option value="Anak">Anak</option>
+                        <option value="Bayi">Bayi</option>
+                      </select>
+                    </div>
+                    <div class="col-md-7"><label class="small-muted">Nama Lengkap</label><input id="p-name" class="form-control form-control-sm" placeholder="Sesuai Identitas" /></div>
+                    <div class="col-md-6"><label class="small-muted">No. Identitas</label><input id="p-idno" class="form-control form-control-sm" placeholder="KTP/SIM/Paspor" /></div>
+                    <div class="col-md-6"><label class="small-muted">Foto Identitas (Opsional)</label><input id="p-ktp" type="file" accept="image/*" class="form-control form-control-sm" /></div>
+                    <div class="col-12 text-end mt-3">
+                      <button type="button" id="add-passenger" class="btn btn-sm btn-primary-accent"><i class="bi bi-person-plus-fill me-1"></i> Tambah</button>
+                    </div>
+                  </div>
+                </div>
+                <div id="passengers-list"></div>
+              </div>
+              <div class="card p-3 border-0 bg-light">
+                <h6 class="fw-bold mb-3" style="color: var(--accent)">3. Kontak Pemesan</h6>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label small-muted fw-bold">WhatsApp <span class="text-danger">*</span></label
+                    ><input id="contact-wa" type="number" class="form-control" required />
+                  </div>
+                  <div class="col-md-6"><label class="form-label small-muted fw-bold">Email (Opsional)</label><input id="contact-email" type="email" class="form-control" /></div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-outline-soft" data-bs-dismiss="modal">Batal</button>
+            <button type="button" id="btn-submit-order" class="btn btn-primary-accent px-4 fw-bold">Kirim Pesanan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manage Locations Modal -->
+    <div class="modal fade" id="manageLocationsModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold">Kelola Lokasi</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <div class="btn-group w-100" role="group">
+                <input type="radio" class="btn-check" name="loc-type" id="loc-type-air" value="AIR" checked autocomplete="off" />
+                <label class="btn btn-outline-primary btn-sm" for="loc-type-air"><i class="bi bi-airplane-fill me-1"></i>Pesawat</label>
+                <input type="radio" class="btn-check" name="loc-type" id="loc-type-sea" value="SEA" autocomplete="off" />
+                <label class="btn btn-outline-primary btn-sm" for="loc-type-sea"><i class="bi bi-ship-fill me-1"></i>Kapal</label>
+              </div>
+            </div>
+            <div class="input-group mb-3">
+              <input id="loc-input" class="form-control" placeholder="Nama lokasi..." />
+              <button id="loc-add-btn" class="btn btn-primary-accent"><i class="bi bi-plus-lg"></i></button>
+            </div>
+            <div id="loc-list" class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090">
+      <div id="liveToast" class="toast align-items-center text-white bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body" id="toast-msg"></div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const LS = { ORD: "tk_orders_v2", AIR: "tk_loc_air_v2", SEA: "tk_loc_sea_v2", USR: "tk_users_v2" };
+      if (!localStorage.getItem(LS.AIR)) localStorage.setItem(LS.AIR, JSON.stringify(["Jakarta (CGK)", "Bali (DPS)", "Surabaya (SUB)", "Medan (KNO)", "Makassar (UPG)"]));
+      if (!localStorage.getItem(LS.SEA)) localStorage.setItem(LS.SEA, JSON.stringify(["Tanjung Priok (JKT)", "Tanjung Perak (SBY)", "Soekarno-Hatta (MKS)", "Belawan (MDN)"]));
+      if (!localStorage.getItem(LS.ORD)) localStorage.setItem(LS.ORD, JSON.stringify([]));
+      if (!localStorage.getItem(LS.USR)) localStorage.setItem(LS.USR, JSON.stringify([]));
+
+      let currentUser = null,
+        isAdminMode = false,
+        currentOrderType = "pesawat",
+        passengers = [],
+        currentLocMode = "AIR",
+        confirmCallback = null;
+
+      const ui = {
+        login: document.getElementById("login-screen"),
+        dash: document.getElementById("dashboard"),
+        adminPanel: document.getElementById("admin-panel"),
+        toast: new bootstrap.Toast(document.getElementById("liveToast")),
+        modals: {
+          admin: new bootstrap.Modal(document.getElementById("adminLoginModal")),
+          order: new bootstrap.Modal(document.getElementById("orderModal")),
+          loc: new bootstrap.Modal(document.getElementById("manageLocationsModal")),
+          confirm: new bootstrap.Modal(document.getElementById("confirmModal")),
+        },
+      };
+
+      const load = (k) => JSON.parse(localStorage.getItem(k) || "[]");
+      const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+      const showToast = (msg, isError = false) => {
+        document.getElementById("toast-msg").textContent = msg;
+        document.getElementById("liveToast").className = `toast align-items-center text-white border-0 ${isError ? "bg-danger" : "bg-dark"}`;
+        ui.toast.show();
+      };
+
+      // New: Custom Confirm Handler
+      function showConfirm(msg, cb) {
+        document.getElementById("confirm-msg").textContent = msg;
+        confirmCallback = cb;
+        ui.modals.confirm.show();
+      }
+      document.getElementById("confirm-yes-btn").onclick = () => {
+        if (confirmCallback) confirmCallback();
+        ui.modals.confirm.hide();
+      };
+
+      document.getElementById("btn-help").onclick = () => showToast("Hubungi Admin via WhatsApp untuk bantuan.");
+
+      // --- AUTH ---
+      document.getElementById("loginForm").onsubmit = (e) => {
+        e.preventDefault();
+        const name = document.getElementById("login-username").value.trim(),
+          pass = document.getElementById("login-password").value.trim();
+        if (!name || pass.length !== 4) return showToast("Nama & Tahun Lahir (4 digit) wajib diisi.", true);
+        const users = load(LS.USR);
+        if (!users.find((u) => u.name.toLowerCase() === name.toLowerCase() && u.birth === pass)) {
+          users.push({ name, birth: pass, joined: new Date().toISOString() });
+          save(LS.USR, users);
+        }
+        currentUser = { name, birth: pass };
+        ui.login.style.display = "none";
+        ui.dash.style.display = "block";
+        document.getElementById("user-name-display").textContent = name.split(" ")[0];
+        document.getElementById("mini-name").textContent = name;
+        renderOrders();
+      };
+      document.getElementById("demo-fill").onclick = () => {
+        document.getElementById("login-username").value = "Pengguna Demo";
+        document.getElementById("login-password").value = "2000";
+      };
+      document.getElementById("btn-logout").onclick = () => showConfirm("Keluar dari aplikasi?", () => location.reload());
+
+      // --- ORDERS ---
+      document.getElementById("hero-flight").onclick = () => openOrderModal("pesawat");
+      document.getElementById("hero-ship").onclick = () => openOrderModal("kapal");
+      function openOrderModal(type) {
+        currentOrderType = type;
+        passengers = [];
+        document.getElementById("orderForm").reset();
+        document.getElementById("toggle-return").checked = false;
+        document.getElementById("date-return").disabled = true;
+        document.getElementById("origin-manual").classList.add("d-none");
+        document.getElementById("dest-manual").classList.add("d-none");
+        document.getElementById("orderModalTitle").innerHTML = type === "pesawat" ? '<i class="bi bi-airplane me-2"></i>Pesan Tiket Pesawat' : '<i class="bi bi-ship me-2"></i>Pesan Tiket Kapal';
+        document.getElementById("label-origin").textContent = type === "pesawat" ? "Bandara Asal" : "Pelabuhan Asal";
+        document.getElementById("label-dest").textContent = type === "pesawat" ? "Bandara Tujuan" : "Pelabuhan Tujuan";
+        populateLocations(type);
+        renderPassengers();
+        ui.modals.order.show();
+      }
+      function populateLocations(type) {
+        const locs = load(type === "pesawat" ? LS.AIR : LS.SEA).sort();
+        const o = document.getElementById("origin-select"),
+          d = document.getElementById("dest-select");
+        o.innerHTML = d.innerHTML = '<option value="" selected disabled>Pilih Lokasi...</option>';
+        locs.forEach((l) => {
+          o.add(new Option(l, l));
+          d.add(new Option(l, l));
+        });
+        o.add(new Option("+ Ketik Manual Lain...", "manual"));
+        d.add(new Option("+ Ketik Manual Lain...", "manual"));
+      }
+      window.checkManual = (side) => {
+        const sel = document.getElementById(`${side}-select`),
+          inp = document.getElementById(`${side}-manual`);
+        if (sel.value === "manual") {
+          inp.classList.remove("d-none");
+          inp.required = true;
+          inp.focus();
+        } else {
+          inp.classList.add("d-none");
+          inp.required = false;
+          inp.value = "";
+        }
+      };
+      document.getElementById("toggle-return").onchange = (e) => {
+        document.getElementById("date-return").disabled = !e.target.checked;
+        if (!e.target.checked) document.getElementById("date-return").value = "";
+      };
+      document.getElementById("add-passenger").onclick = async () => {
+        const name = document.getElementById("p-name").value.trim();
+        if (!name) return showToast("Nama penumpang wajib.", true);
+        passengers.push({
+          title: document.getElementById("p-title").value,
+          type: document.getElementById("p-type").value,
+          name,
+          idno: document.getElementById("p-idno").value.trim() || "-",
+          ktp: document.getElementById("p-ktp").files[0] ? await toBase64(document.getElementById("p-ktp").files[0]) : null,
+        });
+        document.getElementById("p-name").value = "";
+        document.getElementById("p-idno").value = "";
+        document.getElementById("p-ktp").value = "";
+        renderPassengers();
+      };
+      function renderPassengers() {
+        document.getElementById("passengers-list").innerHTML = passengers.length
+          ? passengers
+              .map(
+                (p, i) =>
+                  `<div class="d-flex justify-content-between align-items-center p-2 mb-2 bg-white border rounded"><div><strong>${i + 1}. ${p.title} ${p.name}</strong> <span class="badge bg-secondary">${
+                    p.type
+                  }</span><div class="small-muted">ID: ${p.idno}</div></div><div class="d-flex align-items-center gap-2">${
+                    p.ktp ? `<img src="${p.ktp}" class="ktp-thumb" onclick="viewImage('${p.ktp}')"/>` : ""
+                  }<button onclick="removePassenger(${i})" class="btn btn-sm btn-outline-danger border-0"><i class="bi bi-trash-fill"></i></button></div></div>`
+              )
+              .join("")
+          : '<div class="text-center text-muted py-3 small-muted border rounded border-dashed">Belum ada penumpang.</div>';
+      }
+      window.removePassenger = (i) => {
+        passengers.splice(i, 1);
+        renderPassengers();
+      };
+
+      document.getElementById("btn-submit-order").onclick = () => {
+        let o = document.getElementById("origin-select").value,
+          d = document.getElementById("dest-select").value;
+        if (o === "manual") o = document.getElementById("origin-manual").value.trim();
+        if (d === "manual") d = document.getElementById("dest-manual").value.trim();
+        const dep = document.getElementById("date-depart").value,
+          wa = document.getElementById("contact-wa").value.trim();
+        if (!o || !d || !dep || !wa) return showToast("Lengkapi Data Utama.", true);
+        if (o.toLowerCase() === d.toLowerCase()) return showToast("Asal & Tujuan sama.", true);
+        if (!passengers.length) return showToast("Minimal 1 penumpang.", true);
+        const ord = load(LS.ORD);
+        ord.push({
+          id: "ORD-" + Date.now().toString(36).toUpperCase(),
+          user: currentUser.name,
+          type: currentOrderType,
+          route: { origin: o, dest: d },
+          dates: { depart: dep, return: document.getElementById("date-return").value || null },
+          passengers: [...passengers],
+          contact: { wa, email: document.getElementById("contact-email").value.trim() },
+          status: "Diproses",
+          createdAt: new Date().toISOString(),
+        });
+        save(LS.ORD, ord);
+        ui.modals.order.hide();
+        showToast("Pesanan Terkirim!");
+        renderOrders();
+        if (isAdminMode) showAdminOrders();
+      };
+      function renderOrders() {
+        const my = load(LS.ORD)
+          .filter((o) => o.user === currentUser.name)
+          .reverse();
+        document.getElementById("orders-list").innerHTML = my.length
+          ? my
+              .map(
+                (o) =>
+                  `<div class="order-item mb-3"><div class="d-flex justify-content-between mb-2"><span class="fw-bold ${o.type === "pesawat" ? "text-primary" : "text-info"}"><i class="bi bi-${
+                    o.type === "pesawat" ? "airplane" : "ship"
+                  } me-1"></i>${o.type.toUpperCase()} ${o.dates.return ? '<span class="badge bg-info text-dark">PP</span>' : ""}</span><span class="badge bg-${
+                    o.status === "Sukses" ? "success" : o.status === "Batal" ? "danger" : "warning"
+                  }">${o.status}</span></div><div class="fw-bold">${o.route.origin} <i class="bi bi-arrow-right small mx-1"></i> ${o.route.dest}</div><div class="small-muted"><i class="bi bi-calendar me-1"></i>${formatDate(
+                    o.dates.depart
+                  )}${o.dates.return ? " - " + formatDate(o.dates.return) : ""} • ${o.passengers.length} Pax</div><div class="text-end small-muted mt-1">#${o.id}</div></div>`
+              )
+              .join("")
+          : '<div class="text-center py-4 text-muted">Belum ada pesanan.</div>';
+      }
+
+      // --- ADMIN ---
+      document.getElementById("btn-admin-entry").onclick = () => ui.modals.admin.show();
+      document.getElementById("adminLoginForm").onsubmit = (e) => {
+        e.preventDefault();
+        if (document.getElementById("admin-username").value === "linus" && document.getElementById("admin-password").value === "linus0317") {
+          isAdminMode = true;
+          ui.modals.admin.hide();
+          ui.adminPanel.style.display = "block";
+          showToast("Login Admin Berhasil");
+          showAdminOrders();
+          document.getElementById("admin-username").value = "";
+          document.getElementById("admin-password").value = "";
+        } else showToast("Login gagal!", true);
+      };
+      document.getElementById("admin-logout").onclick = () => {
+        isAdminMode = false;
+        ui.adminPanel.style.display = "none";
+        showToast("Admin Logged Out");
+      };
+      ["tab-orders", "tab-users", "tab-loc", "tab-report"].forEach(
+        (id) =>
+          (document.getElementById(id).onclick = (e) => {
+            document.querySelectorAll(".active-admin-tab").forEach((el) => {
+              el.classList.remove("active-admin-tab", "btn-primary-accent", "text-white");
+              el.classList.add("btn-outline-soft");
+            });
+            e.target.closest("button").classList.add("active-admin-tab", "btn-primary-accent", "text-white");
+            e.target.closest("button").classList.remove("btn-outline-soft");
+            if (id === "tab-orders") showAdminOrders();
+            else if (id === "tab-users") showAdminUsers();
+            else if (id === "tab-report") showAdminReport();
+            else openLocManager();
+          })
+      );
+      function showAdminOrders() {
+        const ord = load(LS.ORD).reverse();
+        document.getElementById("admin-content").innerHTML = ord.length
+          ? ord
+              .map(
+                (o) =>
+                  `<div class="card mb-2 border shadow-sm" style="font-size:0.9rem"><div class="card-header bg-white d-flex justify-content-between align-items-center py-2"><strong>${o.id}</strong><select onchange="updateStatus('${
+                    o.id
+                  }',this.value)" class="status-select ${o.status === "Sukses" ? "text-success fw-bold" : o.status === "Batal" ? "text-danger fw-bold" : "text-warning fw-bold"}"><option ${
+                    o.status === "Diproses" ? "selected" : ""
+                  }>Diproses</option><option ${o.status === "Sukses" ? "selected" : ""}>Sukses</option><option ${o.status === "Batal" ? "selected" : ""}>Batal</option></select></div><div class="card-body py-2"><div class="mb-1"><strong>${
+                    o.user
+                  }</strong> (<a href="https://wa.me/${o.contact.wa.replace(/^0/, "62")}" target="_blank">WA</a>)</div><div class="mb-1">[${o.type.toUpperCase()}] ${o.route.origin} &rarr; ${
+                    o.route.dest
+                  }</div><button class="btn btn-sm btn-outline-primary py-0 mt-2" data-bs-toggle="collapse" data-bs-target="#d${o.id}">Lihat ${o.passengers.length} Pax</button><button onclick="deleteOrder('${
+                    o.id
+                  }')" class="btn btn-sm btn-link text-danger py-0 float-end mt-2">Hapus</button><div class="collapse mt-2 border-top pt-2" id="d${o.id}"><ol class="ps-3 mb-0 small-muted">${o.passengers
+                    .map((p, i) => `<li>${p.name} (${p.type}) ${p.ktp ? `<i class="bi bi-card-image text-primary ms-1" style="cursor:pointer" onclick="viewPaxImg('${o.id}',${i})"></i>` : ""}</li>`)
+                    .join("")}</ol></div></div></div>`
+              )
+              .join("")
+          : '<div class="text-muted text-center">Kosong</div>';
+      }
+      window.updateStatus = (id, s) => {
+        const od = load(LS.ORD),
+          ix = od.findIndex((o) => o.id === id);
+        if (ix >= 0) {
+          od[ix].status = s;
+          save(LS.ORD, od);
+          showAdminOrders();
+          renderOrders();
+          showToast("Status updated");
+        }
+      };
+      window.deleteOrder = (id) =>
+        showConfirm("Hapus pesanan ini permanen?", () => {
+          save(
+            LS.ORD,
+            load(LS.ORD).filter((o) => o.id !== id)
+          );
+          showAdminOrders();
+          renderOrders();
+          showToast("Pesanan dihapus.");
+        });
+      function showAdminUsers() {
+        const u = load(LS.USR).reverse();
+        document.getElementById("admin-content").innerHTML = `<div class="mb-2 fw-bold">Total: ${u.length}</div><ul class="list-group list-group-flush">${u
+          .map(
+            (x) =>
+              `<li class="list-group-item d-flex justify-content-between px-0"><div><strong>${x.name}</strong> (${x.birth})</div><button onclick="delUser('${x.name}','${x.birth}')" class="btn btn-sm btn-outline-danger border-0"><i class="bi bi-trash"></i></button></li>`
+          )
+          .join("")}</ul>`;
+      }
+      window.delUser = (n, b) =>
+        showConfirm(`Hapus user ${n}?`, () => {
+          save(
+            LS.USR,
+            load(LS.USR).filter((u) => !(u.name === n && u.birth === b))
+          );
+          showAdminUsers();
+          showToast("User dihapus.");
+        });
+      function openLocManager() {
+        currentLocMode = document.querySelector('input[name="loc-type"]:checked').value;
+        renderLocs();
+        ui.modals.loc.show();
+      }
+      document.querySelectorAll('input[name="loc-type"]').forEach(
+        (el) =>
+          (el.onchange = () => {
+            currentLocMode = el.value;
+            renderLocs();
+          })
+      );
+      function renderLocs() {
+        document.getElementById("loc-list").innerHTML = load(currentLocMode === "AIR" ? LS.AIR : LS.SEA)
+          .map((l, i) => `<div class="list-group-item d-flex justify-content-between align-items-center px-2"><span>${l}</span><button onclick="delLoc(${i})" class="btn btn-sm text-danger"><i class="bi bi-trash"></i></button></div>`)
+          .join("");
+      }
+      document.getElementById("loc-add-btn").onclick = () => {
+        const v = document.getElementById("loc-input").value.trim(),
+          k = currentLocMode === "AIR" ? LS.AIR : LS.SEA,
+          d = load(k);
+        if (v && !d.includes(v)) {
+          d.push(v);
+          save(k, d);
+          document.getElementById("loc-input").value = "";
+          renderLocs();
+        }
+      };
+      window.delLoc = (i) =>
+        showConfirm("Hapus lokasi ini?", () => {
+          const k = currentLocMode === "AIR" ? LS.AIR : LS.SEA,
+            d = load(k);
+          d.splice(i, 1);
+          save(k, d);
+          renderLocs();
+        });
+      function showAdminReport() {
+        const o = load(LS.ORD),
+          u = load(LS.USR);
+        document.getElementById("admin-content").innerHTML = `<div class="row g-2 text-center"><div class="col-6"><div class="p-3 border rounded bg-white"><h3 class="text-primary mb-0">${
+          o.length
+        }</h3><small>Total Pesanan</small></div></div><div class="col-6"><div class="p-3 border rounded bg-white"><h3 class="text-success mb-0">${
+          o.filter((x) => x.status === "Sukses").length
+        }</h3><small>Sukses</small></div></div><div class="col-4"><div class="p-2 border rounded bg-white fw-bold">${
+          o.filter((x) => x.status === "Diproses").length
+        }<br><small class="fw-normal">Diproses</small></div></div><div class="col-4"><div class="p-2 border rounded bg-white fw-bold text-danger">${
+          o.filter((x) => x.status === "Batal").length
+        }<br><small class="fw-normal text-dark">Batal</small></div></div><div class="col-4"><div class="p-2 border rounded bg-white fw-bold text-info">${u.length}<br><small class="fw-normal text-dark">Users</small></div></div></div>`;
+      }
+      function toBase64(f) {
+        return new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = () => res(r.result);
+          r.onerror = rej;
+          r.readAsDataURL(f);
+        });
+      }
+      function viewImage(src) {
+        const w = window.open("", "_blank");
+        w.document.write(`<img src="${src}" style="max-width:100%">`);
+      }
+      window.viewPaxImg = (oid, pi) => {
+        const o = load(LS.ORD).find((x) => x.id === oid);
+        if (o && o.passengers[pi].ktp) viewImage(o.passengers[pi].ktp);
+      };
+      function formatDate(d) {
+        return d ? new Date(d).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "2-digit" }) : "";
+      }
+    </script>
+  </body>
+</html>
